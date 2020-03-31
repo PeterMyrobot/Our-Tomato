@@ -3,6 +3,8 @@ import os
 import math
 from pygame.locals import *
 
+from roundrects import round_rect
+
 pygame.init()
 
 pygame.display.set_caption('Our Tomato')
@@ -28,26 +30,29 @@ STOP_IMG = pygame.image.load(os.path.join("icon", "stop.png"))
 STOP_IMG_HOVER = pygame.image.load(os.path.join("icon", "stop_hover.png"))
 
 
-def show_text(text, x, y, win):
-    my_font = pygame.font.SysFont("arial", 60)
-    text = my_font.render(text, True, (255, 255, 255))
+def show_text(text, x, y, size, color, win):
+    my_font = pygame.font.SysFont("arial", size)
+    text = my_font.render(text, True, color)
     win.blit(text, (x, y))
 
+def show_text_input( win):
+    round_rect(win,(10,10,30,20), (255,255,255), 3)
 
 def draw_circle(angle, radius, width, x, y, color, win):
-    degree = 0
-    while degree < angle:
-        new_x = int(x + radius * math.cos(math.pi/2 -degree))
-        new_y = int(y - radius * math.sin(math.pi/2 - degree))
-        pygame.draw.circle(win, color, (new_x, new_y), width)
-        degree += math.pi/100
+    pass
+    # degree = 0
+    # while degree < angle:
+    #     new_x = int(x + radius * math.cos(math.pi/2 -degree))
+    #     new_y = int(y - radius * math.sin(math.pi/2 - degree))
+    #     pygame.draw.circle(win, color, (new_x, new_y), width)
+    #     degree += math.pi/100
 
 
 rundown_sec = 25*60
 
 def convert_to_time(sec):
     mins, secs = divmod(sec, 60)
-    timeformat = '{}:{}'.format(mins, secs)
+    timeformat = '{:0>2d}:{:0>2d}'.format(mins, secs)
     return timeformat
 
 
@@ -55,7 +60,9 @@ def render_win(win):
 
     win.fill(BG_COLOR)
 
-    show_text(convert_to_time(rundown_sec), 90, 100, win)
+    show_text(convert_to_time(rundown_sec), 90, 100, 60, (255, 255, 255), win)
+    show_text_input(win)
+    show_text('25', 18, 10, 15, BG_COLOR, win)
     draw_circle(6.28, 100, 3, 150, 150, EMPTY_COLOR, win)
     draw_circle(3.14, 100, 3, 150, 150, FILL_COLOR, win)
 
