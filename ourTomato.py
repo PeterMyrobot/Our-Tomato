@@ -1,6 +1,5 @@
 import pygame
 import os
-import math
 from pygame.locals import *
 
 from roundrects import round_rect
@@ -18,8 +17,9 @@ FILL_COLOR = (172, 222, 216)
 
 MINS_RECT = (10, 10, 30, 20)
 SECS_RECT = (52, 10, 30, 20)
+DASH_RECT = (40, 10, 12, 20)
 LEFTBUTTON_RECT = (10,300-42,)
-DASH_RECT = (45, 10,15)
+
 
 win = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
@@ -30,26 +30,47 @@ pygame.time.set_timer(MOVEEVENT, t)
 PAUSE_IMG = [ pygame.image.load(os.path.join("icon", "pause.png")), pygame.image.load(os.path.join("icon", "pause_hover.png"))]
 PLAY_IMG = [pygame.image.load(os.path.join("icon", "play.png")), pygame.image.load(os.path.join("icon", "play_hover.png"))]
 STOP_IMG = [pygame.image.load(os.path.join("icon", "stop.png")), pygame.image.load(os.path.join("icon", "stop_hover.png"))]
+PROGRESS_IMG = [pygame.image.load(os.path.join("progress", "my_tomato_time_{}.png".format(i))) for i in range(37)]
 
 
-def show_text(text, x, y, size, color, win):
-    my_font = pygame.font.SysFont("arial", size)
+def show_text_rect(text, size, rect, color,  win):
+    my_font = pygame.font.Font("alien.ttf", size)
     text = my_font.render(text, True, color)
+
+    x = rect[0] + (rect[2] - text.get_rect().width)//2
+    y = rect[1] + (rect[3] - text.get_rect().height)//2
     win.blit(text, (x, y))
 
 
 def show_text_input(win, work, rest):
-    round_rect(win, (10, 10, 30, 20), (255, 255, 255), 3)
-    round_rect(win, (52, 10, 30, 20), (255, 255, 255), 3)
+    round_rect(win, MINS_RECT, (255, 255, 255), 3)
+    round_rect(win, SECS_RECT, (255, 255, 255), 3)
 
-    show_text('-', 45, 10, 15, (255, 255, 255), win)
-    show_text(str(work), 18, 10, 15, BG_COLOR, win)
-    show_text(str(rest), 60, 10, 15, BG_COLOR, win)
+    show_text_rect('-',  15, DASH_RECT, (255, 255, 255), win)
+    show_text_rect(str(work), 15, MINS_RECT, BG_COLOR, win)
+    show_text_rect(str(rest), 15, SECS_RECT, BG_COLOR, win)
+
+
+def show_text_countdown(win, time):
+    my_font = pygame.font.Font("alien.ttf", 46)
+    my_font2 = pygame.font.Font("Roboto-Thin.ttf", 13)
+    text = my_font.render(time, True, (255, 255, 255))
+    till_text = my_font2.render('Till 00 : 00', True, (255, 255, 255))
+
+    x1 = 50 + (200 - text.get_rect().width)//2
+    y1 = 50 + 74
+
+    x2 = 50 + (200 - till_text.get_rect().width)//2
+    y2 = y1 + text.get_rect().height + 15
+
+    win.blit(text, (x1, y1))
+    win.blit(till_text, (x2, y2))
 
 
 work_time = 25
 rest_time = 5
 
+total_sec = 25*60
 rundown_sec = 25*60
 
 is_left_hover = 0
@@ -69,14 +90,11 @@ def change_time(pos, is_add):
         else:
             rest_time -= 1
 
-def draw_circle(angle, radius, width, x, y, color, win):
-    pass
-    # degree = 0
-    # while degree < angle:
-    #     new_x = int(x + radius * math.cos(math.pi/2 -degree))
-    #     new_y = int(y - radius * math.sin(math.pi/2 - degree))
-    #     pygame.draw.circle(win, color, (new_x, new_y), width)
-    #     degree += math.pi/100
+def draw_circle(percent, win):
+
+    idx = - int(percent // 2.7)
+    win.blit(PROGRESS_IMG[idx], (0, 0))
+
 
 
 def convert_to_time(sec):
@@ -88,12 +106,11 @@ def convert_to_time(sec):
 def render_win(win):
     win.fill(BG_COLOR)
 
-    show_text(convert_to_time(rundown_sec), 90, 100, 60, (255, 255, 255), win)
     show_text_input(win, work_time, rest_time)
+    show_text_countdown(win, convert_to_time(rundown_sec))
 
-    draw_circle(6.28, 100, 3, 150, 150, EMPTY_COLOR, win)
-    draw_circle(3.14, 100, 3, 150, 150, FILL_COLOR, win)
-
+    percent = int(rundown_sec/total_sec * 100)
+    draw_circle(percent, win)
 
     win.blit(PLAY_IMG[is_left_hover], (10, 300-42))
     win.blit(PAUSE_IMG[is_right_hover], (300-42, 300-42))
