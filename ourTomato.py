@@ -5,6 +5,8 @@ from pygame.locals import *
 from roundrects import round_rect
 
 pygame.init()
+pygame.mixer.init()
+pygame.time.delay(1000)
 
 pygame.display.set_caption('Our Tomato')
 
@@ -24,6 +26,8 @@ win = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 time_ticks, t = pygame.USEREVENT + 1, 1000
 pygame.time.set_timer(time_ticks, t)
+
+ring = pygame.mixer.Sound(os.path.join("ring", "BELL.wav"))
 
 PAUSE_IMG = [ pygame.image.load(os.path.join("icon", "pause.png")), pygame.image.load(os.path.join("icon", "pause_hover.png"))]
 PLAY_IMG = [pygame.image.load(os.path.join("icon", "play.png")), pygame.image.load(os.path.join("icon", "play_hover.png"))]
@@ -61,7 +65,7 @@ def show_text_input(win, work, rest):
     round_rect(win, MINS_RECT, (255, 255, 255), 3)
     round_rect(win, SECS_RECT, (255, 255, 255), 3)
 
-    show_text_rect('-',  15, DASH_RECT, (255, 255, 255), win)
+    show_text_rect('-',  12, DASH_RECT, (255, 255, 255), win)
     show_text_rect(str(work), 15, MINS_RECT, BG_COLOR, win)
     show_text_rect(str(rest), 15, SECS_RECT, BG_COLOR, win)
 
@@ -183,11 +187,14 @@ while run:
                     work_sec -= 1
                     if work_sec == 0:
                         # alert
-                        work_time = False
+                        ring.play()
+                        is_work_time = False
+                        work_sec = total_work_sec
                 else:
                     rest_sec -= 1
                     if rest_sec == 0:
-                        work_time = True
+                        is_work_time = True
+                        rest_sec = total_rest_sec
     render_win(win)
 
 pygame.quit()
